@@ -23,6 +23,7 @@ import funky
 # Local imports
 from gittle.auth import GittleAuth
 from gittle.exceptions import InvalidRemoteUrl
+from gittle.exceptions import InvalidTag
 from gittle import utils
 
 
@@ -1125,6 +1126,27 @@ class Gittle(object):
 
         # Change main branch
         self.repo.refs.set_symbolic_ref('HEAD', branch_ref)
+
+        if self.is_working:
+            # Remove all files
+            self.clean_working()
+
+            # Add files for the current branch
+            self.checkout_all()
+
+    def switch_tag(self, tag_name, tracking=None):
+        """Changes the specified tag
+        """
+
+        # Check if tag exists
+        if not tag_name in self.tags:
+            raise InvalidTag()
+
+        # Get tag reference
+        tag_ref = self._format_ref_tag(tag_name)
+
+        # Change main branch
+        self.repo.refs.set_symbolic_ref('HEAD', tag_ref)
 
         if self.is_working:
             # Remove all files
